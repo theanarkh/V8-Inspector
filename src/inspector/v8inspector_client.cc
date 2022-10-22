@@ -1,4 +1,5 @@
 #include "v8inspector_client.h"
+#include <unistd.h>
 
 V8InspectorClientImpl::V8InspectorClientImpl(const std::unique_ptr<v8::Platform> &platform, const v8::Local<v8::Context> &context) {
     platform_ = platform.get();
@@ -79,4 +80,11 @@ void V8InspectorClientImpl::onMessage(char *buf, size_t count) {
         }, this); 
     }
     condition_variable_.notify_one();
+}
+
+void V8InspectorClientImpl::startRepeatingTimer(double interval_s,
+                           TimerCallback callback,
+                           void* data) {
+    sleep(interval_s);
+    callback(data);
 }

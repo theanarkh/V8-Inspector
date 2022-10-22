@@ -6,6 +6,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define BUF_LEN 1*1024*1024
+
 static inline std::string convertToString(v8::Isolate* isolate, const v8_inspector::StringView stringView) {
   int length = static_cast<int>(stringView.length());
   v8::Local<v8::String> message = (
@@ -34,5 +36,12 @@ static inline std::string getPropertyFromJson(v8::Isolate* isolate, const v8::Lo
     v8::Local<v8::Value> property = jsonObject->Get(isolate->GetCurrentContext(), v8::String::NewFromUtf8(isolate, propertyName.c_str(), v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked();
     v8::String::Utf8Value utf8Value(isolate, property);
     return *utf8Value;
+}
+
+static inline void set_buf_size(int fd) {
+  uint64_t size = BUF_LEN;
+  int ret1 = setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+  int ret2 = setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+  printf("%d set buffer size ret: %d %d", fd, ret1, ret2);
 }
 #endif // UTILS_H

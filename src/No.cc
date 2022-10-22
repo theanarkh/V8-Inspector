@@ -14,16 +14,14 @@
 
 using namespace v8;
 
-#define BUF_LEN 60000
-
 void worker(V8InspectorClientImpl* client) {
     struct sockaddr_in server_addr;
     int connfd;
     struct sockaddr_in clent_addr; 
     socklen_t len = sizeof(clent_addr);
     size_t count;
+    char* buf = new char[BUF_LEN];
     int server_fd = socket(AF_INET, SOCK_DGRAM, 0);
-
     if (server_fd < 0) { 
         perror("create socket error"); 
         goto EXIT;
@@ -38,7 +36,7 @@ void worker(V8InspectorClientImpl* client) {
         perror("bind address error"); 
         goto EXIT;
     }
-    char buf[BUF_LEN];
+    set_buf_size(server_fd);
     while(1)
     {
         struct sockaddr_in server; 
@@ -63,9 +61,9 @@ void worker(V8InspectorClientImpl* client) {
             client->onMessage(buf, count);
         }
     }
-
     close(server_fd);
 EXIT:
+    delete[] buf;
     return;
 }
 

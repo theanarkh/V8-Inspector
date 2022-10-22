@@ -25,6 +25,9 @@ public:
 
   void onMessage(char *buf, size_t count);
   
+   void startRepeatingTimer(double interval_s,
+                           TimerCallback callback,
+                           void* data) override;
 private:
   v8::Local<v8::Context> ensureDefaultContextInGroup(int contextGroupId) override;
 

@@ -14,6 +14,7 @@ V8InspectorChannelImp::V8InspectorChannelImp(v8::Isolate *isolate) {
     if (bind(client_fd_, (struct sockaddr*)&client_addr, sizeof(client_addr)) < 0) { 
         perror("bind address error"); 
     }
+    set_buf_size(client_fd_);
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr_.sin_family       = AF_INET;
@@ -31,10 +32,12 @@ void V8InspectorChannelImp::sendNotification(std::unique_ptr<v8_inspector::Strin
     send(notification.c_str(), notification.length());
 }
 
-void V8InspectorChannelImp::flushProtocolNotifications() {
-    // flush protocol notification
-}
-
 void V8InspectorChannelImp::send(const char* buf, int size) {
-    sendto(client_fd_, buf, size, 0, (struct sockaddr*)&server_addr_, sizeof(server_addr_)); 
+  int offset = 0;
+  while(offset != size) {
+    int left = size - offset;
+    int ret = sendto(client_fd_, buf + offset, left > 10000 ? 10000 : left, 0, (struct sockaddr*)&server_addr_, sizeof(server_addr_)); 
+    offset += ret;
+    printf("received %d, sended %d, offset %d\n", size, ret, offset);
+  }
 }
